@@ -1,0 +1,8 @@
+{
+  "contracts": {
+    "buildDir": ".",
+    "dockerfile": "Dockerfile",
+    "rebuildPatterns": ["."],
+    "dependencies": [""]
+  }
+}
