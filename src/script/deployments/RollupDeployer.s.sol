@@ -10,6 +10,7 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 import {IRollupProcessor} from "rollup-encoder/interfaces/IRollupProcessor.sol";
 import {RollupProcessor} from "core/processors/RollupProcessor.sol";
 import {RollupProcessorV2} from "core/processors/RollupProcessorV2.sol";
+import {RollupProcessorV2 as refV2} from "core/reference/RollupProcessorV2.sol";
 import {DefiBridgeProxy} from "core/DefiBridgeProxy.sol";
 import {PermitHelper} from "periphery/PermitHelper.sol";
 import {ProxyDeployer} from "periphery/ProxyDeployer.sol";
@@ -38,15 +39,6 @@ contract RollupDeployer is Test {
     function deploy(DeployParams memory _params)
         public
         returns (
-            /*        address _verifier,
-            address _contractOwner,
-            uint256 _escapeBlockLowerBound,
-            uint256 _escapeBlockUpperBound,
-            bytes32 _initDataRoot,
-            bytes32 _initNullRoot,
-            bytes32 _initRootRoot,
-            uint32 _initDataSize,
-            bool _allowThirdPartyContract*/
             address,
             address,
             address,
@@ -116,8 +108,13 @@ contract RollupDeployer is Test {
         uint256 lower = old.escapeBlockLowerBound();
         uint256 upper = old.escapeBlockUpperBound();
 
+        RollupProcessorV2 rollupProcessorV2;
         if (isDeploying) vm.broadcast();
-        RollupProcessorV2 rollupProcessorV2 = new RollupProcessorV2(lower, upper);
+        if (vm.envOr("REFERENCE", false)) {
+            rollupProcessorV2 = RollupProcessorV2(address(new refV2(lower, upper)));
+        } else {
+            rollupProcessorV2 = new RollupProcessorV2(lower, upper);
+        }
 
         vm.expectRevert("Initializable: contract is already initialized");
         rollupProcessorV2.initialize();
