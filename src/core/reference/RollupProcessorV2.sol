@@ -2,20 +2,20 @@
 // Copyright 2022 Aztec.
 pragma solidity >=0.8.4;
 
-import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {AccessControl} from '@openzeppelin/contracts/access/AccessControl.sol';
-import {Initializable} from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import {IVerifier} from '../interfaces/IVerifier.sol';
-import {IRollupProcessorV2, IRollupProcessor} from 'rollup-encoder/interfaces/IRollupProcessorV2.sol';
-import {IDefiBridge} from '../interfaces/IDefiBridge.sol';
+import {IVerifier} from "../interfaces/IVerifier.sol";
+import {IRollupProcessorV2, IRollupProcessor} from "rollup-encoder/interfaces/IRollupProcessorV2.sol";
+import {IDefiBridge} from "../interfaces/IDefiBridge.sol";
 
-import {Decoder} from '../Decoder.sol';
-import {AztecTypes} from 'rollup-encoder/libraries/AztecTypes.sol';
+import {Decoder} from "../Decoder.sol";
+import {AztecTypes} from "rollup-encoder/libraries/AztecTypes.sol";
 
-import {TokenTransfers} from '../libraries/TokenTransfers.sol';
-import {RollupProcessorLibrary} from 'rollup-encoder/libraries/RollupProcessorLibrary.sol';
-import {SafeCast} from '../libraries/SafeCast.sol';
+import {TokenTransfers} from "../libraries/TokenTransfers.sol";
+import {RollupProcessorLibrary} from "rollup-encoder/libraries/RollupProcessorLibrary.sol";
+import {SafeCast} from "../libraries/SafeCast.sol";
 
 /**
  * @title Rollup Processor
@@ -56,8 +56,7 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
     error INCORRECT_STATE_HASH(bytes32 oldStateHash, bytes32 newStateHash);
     error INCORRECT_DATA_START_INDEX(uint256 providedIndex, uint256 expectedIndex);
     error INCORRECT_PREVIOUS_DEFI_INTERACTION_HASH(
-        bytes32 providedDefiInteractionHash,
-        bytes32 expectedDefiInteractionHash
+        bytes32 providedDefiInteractionHash, bytes32 expectedDefiInteractionHash
     );
     error PUBLIC_INPUTS_HASH_VERIFICATION_FAILED(uint256, uint256);
     error PROOF_VERIFICATION_FAILED();
@@ -79,9 +78,7 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
         bytes errorReason
     );
     event AsyncDefiBridgeProcessed(
-        uint256 indexed encodedBridgeCallData,
-        uint256 indexed nonce,
-        uint256 totalInputValue
+        uint256 indexed encodedBridgeCallData, uint256 indexed nonce, uint256 totalInputValue
     );
     event Deposit(uint256 indexed assetId, address indexed depositorAddress, uint256 depositValue);
     event AssetAdded(uint256 indexed assetId, address indexed assetAddress, uint256 assetGasLimit);
@@ -287,10 +284,10 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
     bytes32 private constant DEFI_RESULT_ZERO_HASH = 0x2d25a1e3a51eb293004c4b56abe12ed0da6bca2b4a21936752a85d102593c1b4;
 
     // roles used in access control
-    bytes32 public constant OWNER_ROLE = keccak256('OWNER_ROLE');
-    bytes32 public constant EMERGENCY_ROLE = keccak256('EMERGENCY_ROLE');
-    bytes32 public constant LISTER_ROLE = keccak256('LISTER_ROLE');
-    bytes32 public constant RESUME_ROLE = keccak256('RESUME_ROLE');
+    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
+    bytes32 public constant EMERGENCY_ROLE = keccak256("EMERGENCY_ROLE");
+    bytes32 public constant LISTER_ROLE = keccak256("LISTER_ROLE");
+    bytes32 public constant RESUME_ROLE = keccak256("RESUME_ROLE");
 
     // bounds used for escape hatch
     uint256 public immutable escapeBlockLowerBound;
@@ -542,10 +539,12 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _provider an address of the rollup provider
      * @param _valid a flag indicating whether `_provider` is valid
      */
-    function setRollupProvider(
-        address _provider,
-        bool _valid
-    ) external override(IRollupProcessor) onlyRole(OWNER_ROLE) noReenter {
+    function setRollupProvider(address _provider, bool _valid)
+        external
+        override(IRollupProcessor)
+        onlyRole(OWNER_ROLE)
+        noReenter
+    {
         rollupProviders[_provider] = _valid;
         emit RollupProviderUpdated(_provider, _valid);
     }
@@ -557,12 +556,11 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _dailyCap The daily "accrual" to available deposits in whole tokens
      * @param _precision The precision (decimals) to multiply the caps with
      */
-    function setAssetCap(
-        uint256 _assetId,
-        uint32 _pendingCap,
-        uint32 _dailyCap,
-        uint8 _precision
-    ) external onlyRole(LISTER_ROLE) noReenter {
+    function setAssetCap(uint256 _assetId, uint32 _pendingCap, uint32 _dailyCap, uint8 _precision)
+        external
+        onlyRole(LISTER_ROLE)
+        noReenter
+    {
         caps[_assetId] = AssetCap({
             available: (uint256(_dailyCap) * 10 ** _precision).toU128(),
             lastUpdatedTimestamp: uint32(block.timestamp),
@@ -601,9 +599,12 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @notice A function which allows holders of OWNER_ROLE to set `allowThirdPartyContracts` flag
      * @param _allowThirdPartyContracts A flag indicating true if allowing third parties to register, false otherwise
      */
-    function setAllowThirdPartyContracts(
-        bool _allowThirdPartyContracts
-    ) external override(IRollupProcessor) onlyRole(OWNER_ROLE) noReenter {
+    function setAllowThirdPartyContracts(bool _allowThirdPartyContracts)
+        external
+        override(IRollupProcessor)
+        onlyRole(OWNER_ROLE)
+        noReenter
+    {
         allowThirdPartyContracts = _allowThirdPartyContracts;
         emit AllowThirdPartyContractsUpdated(_allowThirdPartyContracts);
     }
@@ -612,9 +613,12 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @notice A function which allows holders of OWNER_ROLE to set address of `DefiBridgeProxy` contract
      * @param _defiBridgeProxy an address of `DefiBridgeProxy` contract
      */
-    function setDefiBridgeProxy(
-        address _defiBridgeProxy
-    ) public override(IRollupProcessor) onlyRole(OWNER_ROLE) noReenter {
+    function setDefiBridgeProxy(address _defiBridgeProxy)
+        public
+        override(IRollupProcessor)
+        onlyRole(OWNER_ROLE)
+        noReenter
+    {
         if (_defiBridgeProxy.code.length == 0) {
             revert INVALID_ADDRESS_NO_CODE();
         }
@@ -627,10 +631,13 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _token address of the ERC20 token
      * @param _gasLimit gas limit used when transferring the token (in withdraw or transferFee)
      */
-    function setSupportedAsset(
-        address _token,
-        uint256 _gasLimit
-    ) external override(IRollupProcessor) whenNotPaused checkThirdPartyContractStatus noReenter {
+    function setSupportedAsset(address _token, uint256 _gasLimit)
+        external
+        override(IRollupProcessor)
+        whenNotPaused
+        checkThirdPartyContractStatus
+        noReenter
+    {
         if (_token.code.length == 0) {
             revert INVALID_ADDRESS_NO_CODE();
         }
@@ -649,10 +656,13 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _bridge address of the bridge contract
      * @param _gasLimit gas limit forwarded to the DefiBridgeProxy to perform convert
      */
-    function setSupportedBridge(
-        address _bridge,
-        uint256 _gasLimit
-    ) external override(IRollupProcessor) whenNotPaused checkThirdPartyContractStatus noReenter {
+    function setSupportedBridge(address _bridge, uint256 _gasLimit)
+        external
+        override(IRollupProcessor)
+        whenNotPaused
+        checkThirdPartyContractStatus
+        noReenter
+    {
         if (_bridge.code.length == 0) {
             revert INVALID_ADDRESS_NO_CODE();
         }
@@ -695,7 +705,7 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
                 lastRollupTimeStamp = uint32(block.timestamp);
             }
         } else {
-            (bool isOpen, ) = getEscapeHatchStatus();
+            (bool isOpen,) = getEscapeHatchStatus();
             if (!isOpen) {
                 revert INVALID_PROVIDER();
             }
@@ -739,12 +749,13 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _owner address that can spend the deposited funds
      * @param _proofHash 32 byte transaction id that can spend the deposited funds
      */
-    function depositPendingFunds(
-        uint256 _assetId,
-        uint256 _amount,
-        address _owner,
-        bytes32 _proofHash
-    ) external payable override(IRollupProcessor) whenNotPaused noReenter {
+    function depositPendingFunds(uint256 _assetId, uint256 _amount, address _owner, bytes32 _proofHash)
+        external
+        payable
+        override(IRollupProcessor)
+        whenNotPaused
+        noReenter
+    {
         // Perform sanity checks on user input
         if (_assetId == ETH_ASSET_ID && msg.value != _amount) {
             revert MSG_VALUE_WRONG_AMOUNT();
@@ -778,12 +789,11 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _totalChunks the total number of chunks.
      * @param - the data
      */
-    function offchainData(
-        uint256 _rollupId,
-        uint256 _chunk,
-        uint256 _totalChunks,
-        bytes calldata /* offchainTxData */
-    ) external override(IRollupProcessor) whenNotPaused {
+    function offchainData(uint256 _rollupId, uint256 _chunk, uint256 _totalChunks, bytes calldata /* offchainTxData */ )
+        external
+        override(IRollupProcessor)
+        whenNotPaused
+    {
         emit OffchainData(_rollupId, _chunk, _totalChunks, msg.sender);
     }
 
@@ -792,9 +802,13 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _interactionNonce unique id of the interaction
      * @return true if successful, false otherwise
      */
-    function processAsyncDefiInteraction(
-        uint256 _interactionNonce
-    ) external override(IRollupProcessor) whenNotPaused noReenterButAsync returns (bool) {
+    function processAsyncDefiInteraction(uint256 _interactionNonce)
+        external
+        override(IRollupProcessor)
+        whenNotPaused
+        noReenterButAsync
+        returns (bool)
+    {
         PendingDefiBridgeInteraction memory interaction = pendingDefiInteractions[_interactionNonce];
 
         if (interaction.encodedBridgeCallData == 0) {
@@ -821,18 +835,10 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
         pendingDefiInteractions[_interactionNonce].encodedBridgeCallData = 0;
 
         // Copy some variables to front of stack to get around stack too deep errors
-        InteractionInputs memory inputs = InteractionInputs(
-            interaction.totalInputValue,
-            _interactionNonce,
-            uint64(fullBridgeCallData.auxData)
-        );
+        InteractionInputs memory inputs =
+            InteractionInputs(interaction.totalInputValue, _interactionNonce, uint64(fullBridgeCallData.auxData));
         (uint256 outputValueA, uint256 outputValueB, bool interactionCompleted) = bridgeContract.finalise(
-            inputAssetA,
-            inputAssetB,
-            outputAssetA,
-            outputAssetB,
-            inputs.interactionNonce,
-            inputs.auxData
+            inputAssetA, inputAssetB, outputAssetA, outputAssetB, inputs.interactionNonce, inputs.auxData
         );
 
         if (!interactionCompleted) {
@@ -879,8 +885,8 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
             outputValueA,
             outputValueB,
             result,
-            ''
-        );
+            ""
+            );
 
         return true;
     }
@@ -896,11 +902,10 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _owner address that can spend the deposited funds
      * @param _amount deposit token amount
      */
-    function increasePendingDepositBalance(
-        uint256 _assetId,
-        address _owner,
-        uint256 _amount
-    ) internal validateAssetIdIsNotVirtual(_assetId) {
+    function increasePendingDepositBalance(uint256 _assetId, address _owner, uint256 _amount)
+        internal
+        validateAssetIdIsNotVirtual(_assetId)
+    {
         uint256 pending = userPendingDeposits[_assetId][_owner];
 
         if (rollupState.capped) {
@@ -941,11 +946,10 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _owner address that owns the pending deposit
      * @param _amount amount of tokens to decrease pending by
      */
-    function decreasePendingDepositBalance(
-        uint256 _assetId,
-        address _owner,
-        uint256 _amount
-    ) internal validateAssetIdIsNotVirtual(_assetId) {
+    function decreasePendingDepositBalance(uint256 _assetId, address _owner, uint256 _amount)
+        internal
+        validateAssetIdIsNotVirtual(_assetId)
+    {
         uint256 userPendingDeposit = userPendingDeposits[_assetId][_owner];
         if (userPendingDeposit < _amount) {
             revert INSUFFICIENT_DEPOSIT();
@@ -986,10 +990,10 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _publicInputsHash a hash of public inputs (computed by `Decoder.sol`)
      * @return rollupId id of the rollup which is being processed
      */
-    function verifyProofAndUpdateState(
-        bytes memory _proofData,
-        uint256 _publicInputsHash
-    ) internal returns (uint256 rollupId) {
+    function verifyProofAndUpdateState(bytes memory _proofData, uint256 _publicInputsHash)
+        internal
+        returns (uint256 rollupId)
+    {
         // Verify the rollup proof.
         //
         // We manually call the verifier contract via assembly to save on gas costs and to reduce contract bytecode size
@@ -1025,10 +1029,8 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
             // `calldataload(0x04)` points to start of bytes array. Add 0x24 to skip over length param and function signature.
             // The calldata param 4 bytes *after* the header is the length of the pub inputs array. However it is a packed 4-byte param.
             // To extract it, we subtract 24 bytes from the calldata pointer and mask off all but the 4 least significant bytes.
-            let encodedInnerDataSize := and(
-                calldataload(add(add(calldataload(0x04), 0x24), sub(ROLLUP_HEADER_LENGTH, 0x18))),
-                0xffffffff
-            )
+            let encodedInnerDataSize :=
+                and(calldataload(add(add(calldataload(0x04), 0x24), sub(ROLLUP_HEADER_LENGTH, 0x18))), 0xffffffff)
 
             // add 8 bytes to skip over the two packed params that follow the rollup header data
             // broadcastedDataSize = inner join-split pubinput size + header size
@@ -1107,13 +1109,8 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      *      in the past could have been subtrees of size 28.
      */
     function validateAndUpdateMerkleRoots(bytes memory _proofData) internal returns (uint256) {
-        (
-            uint256 rollupId,
-            bytes32 oldStateHash,
-            bytes32 newStateHash,
-            uint32 numDataLeaves,
-            uint32 dataStartIndex
-        ) = computeRootHashes(_proofData);
+        (uint256 rollupId, bytes32 oldStateHash, bytes32 newStateHash, uint32 numDataLeaves, uint32 dataStartIndex) =
+            computeRootHashes(_proofData);
 
         if (oldStateHash != rollupStateHash) {
             revert INCORRECT_STATE_HASH(oldStateHash, newStateHash);
@@ -1145,11 +1142,9 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _numTxs number of transactions rolled up in the proof
      * @param _signatures byte array of secp256k1 ECDSA signatures, authorising a transfer of tokens
      */
-    function processDepositsAndWithdrawals(
-        bytes memory _proofData,
-        uint256 _numTxs,
-        bytes memory _signatures
-    ) internal {
+    function processDepositsAndWithdrawals(bytes memory _proofData, uint256 _numTxs, bytes memory _signatures)
+        internal
+    {
         uint256 sigIndex = 0x00;
         uint256 proofDataPtr;
         uint256 end;
@@ -1285,10 +1280,7 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
                 } else {
                     address assetAddress = getSupportedAsset(assetId);
                     TokenTransfers.transferToDoNotBubbleErrors(
-                        assetAddress,
-                        _feeReceiver,
-                        txFee,
-                        assetGasLimits[assetId]
+                        assetAddress, _feeReceiver, txFee, assetGasLimits[assetId]
                     );
                 }
             }
@@ -1318,10 +1310,7 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
         } else {
             address assetAddress = getSupportedAsset(_assetId);
             TokenTransfers.transferToDoNotBubbleErrors(
-                assetAddress,
-                _receiver,
-                _withdrawValue,
-                assetGasLimits[_assetId]
+                assetAddress, _receiver, _withdrawValue, assetGasLimits[_assetId]
             );
         }
     }
@@ -1412,9 +1401,13 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _assetId identifier used to denote a particular asset
      * @return - the address of the matching asset
      */
-    function getSupportedAsset(
-        uint256 _assetId
-    ) public view override(IRollupProcessor) validateAssetIdIsNotVirtual(_assetId) returns (address) {
+    function getSupportedAsset(uint256 _assetId)
+        public
+        view
+        override(IRollupProcessor)
+        validateAssetIdIsNotVirtual(_assetId)
+        returns (address)
+    {
         // If assetId == ETH_ASSET_ID (i.e. 0), this represents native ETH.
         // ERC20 token asset id values start at 1
         if (_assetId == ETH_ASSET_ID) {
@@ -1504,9 +1497,11 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      *
      * @return fullBridgeCallData a struct that contains information defining a specific bridge call
      */
-    function getFullBridgeCallData(
-        uint256 _encodedBridgeCallData
-    ) internal view returns (FullBridgeCallData memory fullBridgeCallData) {
+    function getFullBridgeCallData(uint256 _encodedBridgeCallData)
+        internal
+        view
+        returns (FullBridgeCallData memory fullBridgeCallData)
+    {
         assembly {
             mstore(fullBridgeCallData, and(_encodedBridgeCallData, MASK_THIRTY_TWO_BITS)) // bridgeAddressId
             mstore(
@@ -1526,8 +1521,7 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
                 and(shr(OUTPUT_ASSET_ID_B_SHIFT, _encodedBridgeCallData), MASK_THIRTY_BITS)
             ) // outputAssetIdB
             mstore(
-                add(fullBridgeCallData, 0xc0),
-                and(shr(AUX_DATA_SHIFT, _encodedBridgeCallData), MASK_SIXTY_FOUR_BITS)
+                add(fullBridgeCallData, 0xc0), and(shr(AUX_DATA_SHIFT, _encodedBridgeCallData), MASK_SIXTY_FOUR_BITS)
             ) // auxData
 
             mstore(
@@ -1564,8 +1558,8 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
             revert INCONSISTENT_BRIDGE_CALL_DATA();
         }
         if (
-            fullBridgeCallData.secondInputInUse &&
-            (fullBridgeCallData.inputAssetIdA == fullBridgeCallData.inputAssetIdB)
+            fullBridgeCallData.secondInputInUse
+                && (fullBridgeCallData.inputAssetIdA == fullBridgeCallData.inputAssetIdB)
         ) {
             revert BRIDGE_WITH_IDENTICAL_INPUT_ASSETS(fullBridgeCallData.inputAssetIdA);
         }
@@ -1587,10 +1581,7 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @return outputAssetA the first output asset
      * @return outputAssetB the second output asset
      */
-    function getAztecAssetTypes(
-        FullBridgeCallData memory _fullBridgeCallData,
-        uint256 _interactionNonce
-    )
+    function getAztecAssetTypes(FullBridgeCallData memory _fullBridgeCallData, uint256 _interactionNonce)
         internal
         view
         returns (
@@ -1600,20 +1591,34 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
             AztecTypes.AztecAsset memory outputAssetB
         )
     {
-        inputAssetA = getAztecAsset(_fullBridgeCallData.inputAssetIdA, _interactionNonce, true, _fullBridgeCallData.firstInputVirtual, true);
-        inputAssetB = getAztecAsset(_fullBridgeCallData.inputAssetIdB, _interactionNonce, true, _fullBridgeCallData.secondInputVirtual, _fullBridgeCallData.secondInputInUse);
+        inputAssetA = getAztecAsset(
+            _fullBridgeCallData.inputAssetIdA, _interactionNonce, true, _fullBridgeCallData.firstInputVirtual, true
+        );
+        inputAssetB = getAztecAsset(
+            _fullBridgeCallData.inputAssetIdB,
+            _interactionNonce,
+            true,
+            _fullBridgeCallData.secondInputVirtual,
+            _fullBridgeCallData.secondInputInUse
+        );
 
-        outputAssetA = getAztecAsset(_fullBridgeCallData.outputAssetIdA, _interactionNonce, false, _fullBridgeCallData.firstOutputVirtual, true);
-        outputAssetB = getAztecAsset(_fullBridgeCallData.outputAssetIdB, _interactionNonce, false, _fullBridgeCallData.secondOutputVirtual, _fullBridgeCallData.secondOutputInUse);
+        outputAssetA = getAztecAsset(
+            _fullBridgeCallData.outputAssetIdA, _interactionNonce, false, _fullBridgeCallData.firstOutputVirtual, true
+        );
+        outputAssetB = getAztecAsset(
+            _fullBridgeCallData.outputAssetIdB,
+            _interactionNonce,
+            false,
+            _fullBridgeCallData.secondOutputVirtual,
+            _fullBridgeCallData.secondOutputInUse
+        );
     }
 
-    function getAztecAsset(
-        uint256 _assetId,
-        uint256 _interactionNonce,
-        bool _isInput,
-        bool _isVirtual,
-        bool _isUsed
-    ) internal view returns (AztecTypes.AztecAsset memory asset) {
+    function getAztecAsset(uint256 _assetId, uint256 _interactionNonce, bool _isInput, bool _isVirtual, bool _isUsed)
+        internal
+        view
+        returns (AztecTypes.AztecAsset memory asset)
+    {
         if (!_isUsed) {
             return AztecTypes.AztecAsset(0, address(0x0), AztecTypes.AztecAssetType.NOT_USED);
         }
@@ -1628,9 +1633,8 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
         } else {
             asset.id = _assetId;
             asset.erc20Address = getSupportedAsset(_assetId);
-            asset.assetType = asset.erc20Address == address(0x0)
-                ? AztecTypes.AztecAssetType.ETH
-                : AztecTypes.AztecAssetType.ERC20;
+            asset.assetType =
+                asset.erc20Address == address(0x0) ? AztecTypes.AztecAssetType.ETH : AztecTypes.AztecAssetType.ERC20;
         }
     }
 
@@ -1721,10 +1725,8 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
          * into the defi tree by the rollup provider (the circuit logic enforces this, we just need to check the rollup
          * provider used the correct inputs)
          */
-        (
-            uint256 defiInteractionHashesLength,
-            uint256 numPendingInteractions
-        ) = getDefiHashesLengthsAndNumPendingInteractions();
+        (uint256 defiInteractionHashesLength, uint256 numPendingInteractions) =
+            getDefiHashesLengthsAndNumPendingInteractions();
         uint256 offset = defiInteractionHashesLength - numPendingInteractions;
         hashes = new bytes32[](NUMBER_OF_BRIDGE_CALLS);
 
@@ -1758,10 +1760,10 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
      * @param _rollupBeneficiary the address that should be paid any subsidy for processing a bridge call
      * @return nextExpectedHashes the set of non-zero hashes that comprise the current pending defi interactions
      */
-    function processBridgeCalls(
-        bytes memory _proofData,
-        address _rollupBeneficiary
-    ) internal returns (bytes32[] memory nextExpectedHashes) {
+    function processBridgeCalls(bytes memory _proofData, address _rollupBeneficiary)
+        internal
+        returns (bytes32[] memory nextExpectedHashes)
+    {
         ProcessBridgeCallVariables memory vars;
 
         // Verify that nextExpectedDefiInteractionsHash equals the value given in the rollup
@@ -1775,10 +1777,7 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
                 revert INCORRECT_PREVIOUS_DEFI_INTERACTION_HASH(providedDefiInteractionsHash, prevDefiInteractionsHash);
             }
             uint256 numPendingInteractions;
-            (
-                vars.defiInteractionHashesLength,
-                numPendingInteractions
-            ) = getDefiHashesLengthsAndNumPendingInteractions();
+            (vars.defiInteractionHashesLength, numPendingInteractions) = getDefiHashesLengthsAndNumPendingInteractions();
             // numPendingInteraction equals the number of interactions expected to be in the given rollup
             // this is the length of the defiInteractionHashes array, capped at the NUM_BRIDGE_CALLS as per the following
             // numPendingInteractions = min(defiInteractionsHashesLength, numberOfBridgeCalls)
@@ -1827,18 +1826,11 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
             }
 
             FullBridgeCallData memory fullBridgeCallData = getFullBridgeCallData(vars.encodedBridgeCallData);
-            vars.bridgeResult = BridgeResult({
-                success: false,
-                errorReason: '',
-                outputValueA: 0,
-                outputValueB: 0,
-                isAsync: false
-            });
+            vars.bridgeResult =
+                BridgeResult({success: false, errorReason: "", outputValueA: 0, outputValueB: 0, isAsync: false});
 
-            (vars.inputAssetA, vars.inputAssetB, vars.outputAssetA, vars.outputAssetB) = getAztecAssetTypes(
-                fullBridgeCallData,
-                vars.interactionNonce
-            );
+            (vars.inputAssetA, vars.inputAssetB, vars.outputAssetA, vars.outputAssetB) =
+                getAztecAssetTypes(fullBridgeCallData, vars.interactionNonce);
 
             {
                 (vars.bridgeResult.success, vars.bridgeResult.errorReason) = defiBridgeProxy.delegatecall{
@@ -1861,10 +1853,10 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
 
                 if (vars.bridgeResult.success) {
                     // Decode the output values from the call
-                    (vars.bridgeResult.outputValueA, vars.bridgeResult.outputValueB, vars.bridgeResult.isAsync) = abi
-                        .decode(vars.bridgeResult.errorReason, (uint256, uint256, bool));
+                    (vars.bridgeResult.outputValueA, vars.bridgeResult.outputValueB, vars.bridgeResult.isAsync) =
+                        abi.decode(vars.bridgeResult.errorReason, (uint256, uint256, bool));
                     // Reset errorReason to empty string
-                    vars.bridgeResult.errorReason = '';
+                    vars.bridgeResult.errorReason = "";
                 }
             }
 
@@ -1874,10 +1866,8 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
 
             if (vars.bridgeResult.isAsync) {
                 emit AsyncDefiBridgeProcessed(vars.encodedBridgeCallData, vars.interactionNonce, vars.totalInputValue);
-                pendingDefiInteractions[vars.interactionNonce] = PendingDefiBridgeInteraction(
-                    vars.encodedBridgeCallData,
-                    vars.totalInputValue
-                );
+                pendingDefiInteractions[vars.interactionNonce] =
+                    PendingDefiBridgeInteraction(vars.encodedBridgeCallData, vars.totalInputValue);
             } else {
                 emit DefiBridgeProcessed(
                     vars.encodedBridgeCallData,
@@ -1887,7 +1877,7 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
                     vars.bridgeResult.outputValueB,
                     vars.bridgeResult.success,
                     vars.bridgeResult.errorReason
-                );
+                    );
 
                 // if interaction is synchronous, compute the interaction hash and add to defiInteractionHashes
                 defiInteractionHashes[vars.defiInteractionHashesLength++] = computeDefiInteractionHash(
@@ -1916,8 +1906,7 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
         }
         rollupState.numAsyncDefiInteractionHashes = 0;
         rollupState.numDefiInteractionHashes =
-            uint16(vars.defiInteractionHashesLength) +
-            asyncDefiInteractionHashesLength;
+            uint16(vars.defiInteractionHashesLength) + asyncDefiInteractionHashesLength;
 
         // now we want to extract the next set of pending defi interaction hashes and calculate their hash to store
         // for the next rollup
@@ -1934,20 +1923,19 @@ contract RollupProcessorV2 is IRollupProcessorV2, Decoder, Initializable, Access
         uint256 _outputValueB,
         bool _result
     ) internal pure returns (bytes32) {
-        return
-            bytes32(
-                uint256(
-                    sha256(
-                        abi.encode(
-                            _encodedBridgeCallData,
-                            _interactionNonce,
-                            _totalInputValue,
-                            _outputValueA,
-                            _outputValueB,
-                            _result
-                        )
+        return bytes32(
+            uint256(
+                sha256(
+                    abi.encode(
+                        _encodedBridgeCallData,
+                        _interactionNonce,
+                        _totalInputValue,
+                        _outputValueA,
+                        _outputValueB,
+                        _result
                     )
-                ) % CIRCUIT_MODULUS
-            );
+                )
+            ) % CIRCUIT_MODULUS
+        );
     }
 }

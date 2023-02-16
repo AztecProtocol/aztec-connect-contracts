@@ -36,16 +36,7 @@ contract RollupDeployer is Test {
         isDeploying = _isDeploying;
     }
 
-    function deploy(DeployParams memory _params)
-        public
-        returns (
-            address,
-            address,
-            address,
-            address,
-            address
-        )
-    {
+    function deploy(DeployParams memory _params) public returns (address, address, address, address, address) {
         if (isDeploying) vm.broadcast();
         DefiBridgeProxy defiBridgeProxy = new DefiBridgeProxy();
 
