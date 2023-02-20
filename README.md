@@ -6,6 +6,8 @@ Aztec is a privacy-first recursive zero-knowledge rollup (zk-zk-rollup) built on
 
 For more information about Aztec, please visit https://aztec.network/ or https://twitter.com/aztecnetwork. Documentation for Aztec Connect Bridges is available at https://github.com/AztecProtocol/aztec-connect-bridges.
 
+If you are interested in the Rollup Contract itself, a reference implementation (too big for mainnet) is put in the `core/reference` folder, it uses less yul so is a little easier to reason about.
+
 ## Developers
 
 If you would like to build on top of Aztec, please see our [documentation](https://aztec.network/developers/).  
@@ -47,6 +49,8 @@ src
 │   ├── DefiBridgeProxy.sol
 │   ├── processors
 │   │   ├── RollupProcessor.sol
+│   │   └── RollupProcessorV2.sol
+│   ├── reference
 │   │   └── RollupProcessorV2.sol
 │   └── verifier
 │       ├── BaseStandardVerifier.sol
@@ -90,7 +94,7 @@ We are currently running a Bug Bounty Program. For all information, please visit
 
 ## Tests
 
-`forge test` will run the test suite. See the forge book linked above about how to target specific tests.
+`forge test` will run the test suite. See the forge book linked above about how to target specific tests. To use the reference implementation set `export REFERENCE=true`. 
 
 ### Running tests in a Docker container:
 
